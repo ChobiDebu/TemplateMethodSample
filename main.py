@@ -13,7 +13,9 @@
 # limitations under the License.
 
 # [START gae_python37_app]
-from flask import Flask
+from flask import Flask, request
+import re
+import os
 from concrete_task import HtmlReport, PlaneTextReport
 import logging
 logging.getLogger().setLevel(logging.INFO)
@@ -26,24 +28,37 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-    logging.info('start')
-    title = "Report Title"
-    text = [
-        "report line 1",
-        "report line 2",
-        "report line 3"
-    ]
+    try:
+        query = request.args.get('target', '')
+        env = os.environ.get('PATTERN')
+        pattern = re.compile(r'%s' % env)
+        logging.info(pattern)
+        match = re.match(pattern, query)
+        if match:
+            logging.info('match!')
+        else:
+            logging.info('not matcn!')
+        logging.info('start')
+        logging.info(query)
+        title = "Report Title"
+        text = [
+            "report line 1",
+            "report line 2",
+            "report line 3"
+        ]
 
-    plane_report = PlaneTextReport(title, text)
-    plane_report.display()
-    print()
+        plane_report = PlaneTextReport(title, text)
+        plane_report.display()
+        print()
 
-    html_report = HtmlReport(title, text)
-    html_report.display()
-    print()
+        html_report = HtmlReport(title, text)
+        html_report.display()
+        print()
 
-    logging.info('stop')
-    return 'Hello World!'
+        logging.info('stop')
+        return 'Hello World!'
+    except Exception:
+        logging.error('error')
 
 
 if __name__ == '__main__':
